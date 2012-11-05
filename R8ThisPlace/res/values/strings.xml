@@ -1,0 +1,39 @@
+<resources>
+
+    <string name="r8Url">http://json4.r8thisplace.appspot.com/rest/json/</string>
+    <string name="r8PutUrl">http://json4.r8thisplace.appspot.com/rest/put/</string>
+    <!--  <string name="r8Url">http://10.40.142.53:8888/rest/json/</string>
+    <string name="r8PutUrl">http://10.40.142.53:8888/rest/put/</string> -->
+    <string name="app_name">R8ThisPlace</string>
+    <string name="searching">Searching&#8230;</string>
+    <string name="loadingPlace">Loading Place&#8230;</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_main">R8 This Place</string>
+    <string name="ratings">Ratings for </string>
+    <string name="general">General</string>
+    <string name="ratingDetails">Rating Details</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="average">Average</string>
+    <string name="overallRating">Overall Rating: </string>
+    <string name="none">None</string>
+    <string name="openSite">(View Website)</string>
+    <string name="noratings">No ratings yet</string>
+    <string name="noresults">No results</string>
+    <string name="title_activity_rate_it">Rate it</string>
+    <string name="pleaseSelectRating">You forgot to select a rating first!</string>
+    <string name="addingRating">Adding your rating&#8230;</string>
+    <string name="doLocationWebSearch">Cannot determine your location with GPS, trying web service.</string>
+    <string name="noLocation">Cannot determine your location! This application can not continue :( </string>
+    <string name="errorGeneral">Something went terribly wrong :( </string>
+    <string name="sendEmail">Email it</string>
+    <string name="chooseEmailClient">Choose an Email client</string>
+    <string name="emailSubject">Come to %1$s!</string>
+    <string name="emailMessage"> I\'m at %1$s. You should come join me! \n\n%2$s </string>
+    <string name="sendText">Text it</string>
+    <string name="txtMessage">Come to %1$s. %2$s </string>
+    <string name="call">Call %1$s</string>
+    <string name="anonymous">anonymous</string>
+     <string name="name">Name</string>
+
+</resources>
