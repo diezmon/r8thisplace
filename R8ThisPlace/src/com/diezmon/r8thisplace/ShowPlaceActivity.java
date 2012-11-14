@@ -1,10 +1,15 @@
 package com.diezmon.r8thisplace;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.app.TabActivity;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.WindowManager;
 import android.widget.TabHost;
@@ -20,6 +25,10 @@ public class ShowPlaceActivity extends TabActivity  {
 	double latitude;
 	double longitude;
 	String googleReference;
+	ProgressDialog pd;
+	
+	public static final String GOOGLE_RESULTS_KEY = "googleResults";
+	public static final String RATING_RESULTS_KEY = "ratingResults";
 	  
     /*
      * (non-Javadoc)
@@ -31,14 +40,9 @@ public class ShowPlaceActivity extends TabActivity  {
 
         setContentView(R.layout.place_detail_dialog);
         
-        
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND,
                 WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
         
-        PlaceDetail placeDetail = null;
-        JSONObject ratingJson = null;
-        
-        // title
         try {
             String s = getIntent().getExtras().getString("title");
             if (s != null && s.length() > 0) {
@@ -48,13 +52,10 @@ public class ShowPlaceActivity extends TabActivity  {
       	  	longitude = getIntent().getExtras().getDouble("longitude");
       	  	googleReference = getIntent().getExtras().getString("reference");
       	  	
-      	  	JSONObject googleInfo = JSONParser.getPlaceDetails(googleReference);
-      	  	
-      	  	placeDetail = new PlaceDetail(googleInfo);
-      	  	
-      	  	placeDetail.ratingInfoJson = JSONParser.getR8ItDetails(latitude, longitude);
-      	  	
-      	  	this.setTitle(placeDetail.name);
+      	  	String dataUrl = JSONParser.getPlaceDetailsUrl(googleReference);
+      	  	String ratingUrl = JSONParser.getR8ItDetailsUrl(latitude, longitude);
+      	  	PlaceDetailsTask detailsTask = new PlaceDetailsTask(this);
+      	  	detailsTask.execute(dataUrl, ratingUrl);
       	  	
         } 
         catch (Exception e) 
@@ -62,26 +63,46 @@ public class ShowPlaceActivity extends TabActivity  {
         	e.printStackTrace();
         }
         
-        TabHost tabHost = getTabHost();
-        
-        TabSpec detailsTab = tabHost.newTabSpec("Info");
-        // setting Title and Icon for the Tab
-        detailsTab.setIndicator(getResources().getString(R.string.general));
-        Intent placeDetIntent = new Intent(this, PlaceDetailActivity.class);
-        placeDetIntent.putExtra(PlaceDetail.PLACE_DETAIL_KEY, placeDetail);
-        
-        detailsTab.setContent(placeDetIntent);
-        
-        TabSpec ratingsTab = tabHost.newTabSpec("Ratings");
-        // setting Title and Icon for the Tab
-        ratingsTab.setIndicator(getResources().getString(R.string.ratingDetails));
-        Intent showRatingsIntent = new Intent(this, PlaceRatingsActivity.class);
-        showRatingsIntent.putExtra(PlaceDetail.PLACE_DETAIL_KEY, placeDetail);   
-        ratingsTab.setContent(showRatingsIntent);
+    }
+    
+    public void onGetResults(Map<String, JSONObject> placeInformationMap)
+    {
+    
+    	PlaceDetail placeDetail = null;
+		
+    	try {
+			placeDetail = new PlaceDetail(placeInformationMap.get(ShowPlaceActivity.GOOGLE_RESULTS_KEY));
 
-        tabHost.addTab(detailsTab);
-        tabHost.addTab(ratingsTab);
-        
+			placeDetail.ratingInfoJson = placeInformationMap.get(ShowPlaceActivity.RATING_RESULTS_KEY);
+
+			this.setTitle(placeDetail.name);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		TabHost tabHost = getTabHost();
+
+		TabSpec detailsTab = tabHost.newTabSpec("Info");
+		// setting Title and Icon for the Tab
+		detailsTab.setIndicator(getResources().getString(R.string.general));
+		Intent placeDetIntent = new Intent(this, PlaceDetailActivity.class);
+		placeDetIntent.putExtra(PlaceDetail.PLACE_DETAIL_KEY, placeDetail);
+
+		detailsTab.setContent(placeDetIntent);
+
+		TabSpec ratingsTab = tabHost.newTabSpec("Ratings");
+		// setting Title and Icon for the Tab
+		ratingsTab.setIndicator(getResources()
+				.getString(R.string.ratingDetails));
+		Intent showRatingsIntent = new Intent(this, PlaceRatingsActivity.class);
+		showRatingsIntent.putExtra(PlaceDetail.PLACE_DETAIL_KEY, placeDetail);
+		ratingsTab.setContent(showRatingsIntent);
+
+		tabHost.addTab(detailsTab);
+		tabHost.addTab(ratingsTab);
+		if (pd != null) this.pd.hide();
+		
     }
 
     /* (non-Javadoc)
@@ -102,5 +123,54 @@ public class ShowPlaceActivity extends TabActivity  {
         setResult(Activity.RESULT_OK, resultIntent);
         finish();
     }
+    
+    private class PlaceDetailsTask extends AsyncTask<String, Void, Map<String, JSONObject>> {
+
+    	ShowPlaceActivity callerActivity;
+    	
+    	public PlaceDetailsTask(ShowPlaceActivity spa) {
+    		this.callerActivity = spa;
+    		pd = new ProgressDialog( ShowPlaceActivity.this); 
+    		pd.setView(ShowPlaceActivity.this.findViewById(R.layout.progressbar));
+			pd.setMessage(ShowPlaceActivity.this.getResources().getText(R.string.loadingPlace));
+			pd.show();
+    	}
+
+    	@Override
+    	protected Map doInBackground(String... params) {		
+			
+    		// TODO Auto-generated method stub	 
+			JSONObject googleResult =  JSONParser.getJSONFromUrl(params[0]);  
+			JSONObject ratingResult =  JSONParser.getJSONFromUrl(params[1]);
+			Map<String, JSONObject> resultsMap = new HashMap<String, JSONObject>();
+			
+			resultsMap.put(ShowPlaceActivity.GOOGLE_RESULTS_KEY, googleResult);
+			resultsMap.put(ShowPlaceActivity.RATING_RESULTS_KEY, ratingResult);
+	
+    		return resultsMap;
+    	}
+
+		@Override
+		protected void onPostExecute(Map<String, JSONObject> result) {
+			// TODO Auto-generated method stub
+//			super.onPostExecute(result);
+			this.callerActivity.onGetResults(result);
+		}
+
+		@Override
+		protected void onCancelled() {
+			// TODO Auto-generated method stub
+			super.onCancelled();
+			if (pd != null)
+			{
+				pd.cancel();
+			}
+		}
+    	
+    	
+    	
+
+    }
+
 
 }

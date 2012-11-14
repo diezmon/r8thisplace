@@ -1,12 +1,14 @@
 package com.diezmon.r8thisplace;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
@@ -22,14 +24,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.diezmon.r8thisplace.model.PlaceDetail;
+import com.diezmon.r8thisplace.util.JSONParser;
 import com.diezmon.r8thisplace.util.R8Util;
 
 public class PlaceDetailActivity extends FragmentActivity implements AddRatingDialog.RatingDialogListener {
 
 	LinearLayout ratingLayout = null;
 	
-	ScrollView ratingsScrollView;
-	LinearLayout ratingsScrollerLayout;
+//	ScrollView ratingsScrollView;
+//	LinearLayout ratingsScrollerLayout;
 	
 	PlaceDetail placeDetail;
 	
@@ -63,11 +66,8 @@ public class PlaceDetailActivity extends FragmentActivity implements AddRatingDi
             
             String webSite = (R8Util.isEmptyTrimmed(placeDetail.webSite))?"":placeDetail.webSite;
             
-//            placeInfo.setText(placeDetail.formatted_address + "\n" + webSite );
-            
             if (!R8Util.isEmptyTrimmed(webSite))
             {
-//            	webSite = webSite + " " + getResources().getText(R.string.openSite);
             	placeInfo.setText(placeDetail.formatted_address + "\n" + getResources().getText(R.string.openSite) );
             	
             	placeInfo.setOnClickListener(new OnClickListener() {
@@ -102,7 +102,7 @@ public class PlaceDetailActivity extends FragmentActivity implements AddRatingDi
             overallRatingLabel = (TextView) this.findViewById(R.id.overallRatingLabel);
             ratingOverall = (ImageView) this.findViewById(R.id.overallRatingImg);
             
-            this.populateData(placeDetail);
+            this.populateData(placeDetail.ratingInfoJson);
            
         }
         catch (Exception e)
@@ -115,10 +115,10 @@ public class PlaceDetailActivity extends FragmentActivity implements AddRatingDi
     }
     
     
-    private void populateData(PlaceDetail placeDetail) throws JSONException
+    private void populateData(JSONObject jObj)
     {
 
-    	JSONObject jObj = placeDetail.ratingInfoJson;// JSONParser.getJSONFromUrl(url.toString());
+//    	JSONObject jObj = placeDetail.ratingInfoJson;
     	
     	int overallRating = 0;
     	
@@ -131,8 +131,14 @@ public class PlaceDetailActivity extends FragmentActivity implements AddRatingDi
     		//je.printStackTrace();
     	}
     	
-    	String theDate = jObj.getString("theDate");
-    	theDate = theDate.split(":")[0];
+    	String theDate = "";
+		try {
+			theDate = jObj.getString("theDate");
+			theDate = theDate.split(":")[0];
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     	
         ratingsLabel.setText(getResources().getString(R.string.ratings) + theDate);
         
@@ -155,6 +161,7 @@ public class PlaceDetailActivity extends FragmentActivity implements AddRatingDi
     	{
     		ratingOverall.setImageResource(R.drawable.ic_thumb_up);
     	}	
+    	R8Util.savePreferenceStr(ShowPlaceActivity.JSON_PLACE_RATINGS_KEY, jObj.toString());
     }
     
     private void showRatingDialog(View view)
@@ -162,7 +169,7 @@ public class PlaceDetailActivity extends FragmentActivity implements AddRatingDi
     	
     	try
     	{
-	    	DialogFragment dialog = new AddRatingDialog();
+    		DialogFragment dialog = new AddRatingDialog();
 	        dialog.show(getSupportFragmentManager(), "AddRatingDialog");
     	}
     	catch (Exception e)
@@ -184,21 +191,13 @@ public class PlaceDetailActivity extends FragmentActivity implements AddRatingDi
 		else
 		{
 		
-			try {
-				placeDetail.ratingInfoJson = 
-						R8Util.addRating(placeDetail.latitude, placeDetail.longitude, (int)dialog.ratingBar.getRating(), dialog.comment.getText().toString(), 
-								String.valueOf(dialog.ratingUser.getSelectedItem()));
-				
-				this.populateData(placeDetail);
-				R8Util.savePreferenceBool(ShowPlaceActivity.DATA_UPDATED_KEY, true);	
-				R8Util.savePreferenceStr(ShowPlaceActivity.JSON_PLACE_RATINGS_KEY, placeDetail.ratingInfoJson.toString());
-				
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				Toast.makeText( this, getResources().getString(R.string.errorGeneral), Toast.LENGTH_LONG ).show();
-				e.printStackTrace();
-			}
+			String updateUrl = R8Util.addRatingUrl(placeDetail.latitude, placeDetail.longitude, (int)dialog.ratingBar.getRating(), dialog.comment.getText().toString(), 
+					String.valueOf(dialog.ratingUser.getSelectedItem()));
+			PlaceDetailsUpdateTask updateRatings = new PlaceDetailsUpdateTask(this);
+			updateRatings.execute(updateUrl);
 			
+			R8Util.savePreferenceBool(ShowPlaceActivity.DATA_UPDATED_KEY, true);
+							
 		}
 		
 	}
@@ -257,6 +256,38 @@ public class PlaceDetailActivity extends FragmentActivity implements AddRatingDi
                 return super.onOptionsItemSelected(item);
         }
     }
+    
+    private class PlaceDetailsUpdateTask extends AsyncTask<String, Void, JSONObject> {
+
+    	PlaceDetailActivity callerActivity;
+    	
+    	public PlaceDetailsUpdateTask(PlaceDetailActivity pda) {
+    		this.callerActivity = pda;
+    	}
+
+    	@Override
+    	protected JSONObject doInBackground(String... params) {
+    			return JSONParser.getJSONFromUrl(params[0]);      			
+    	}
+
+		@Override
+		protected void onPostExecute(JSONObject result) {
+			// TODO Auto-generated method stub
+//			super.onPostExecute(result);
+			this.callerActivity.populateData(result);
+		}
+
+		@Override
+		protected void onCancelled() {
+			// TODO Auto-generated method stub
+			super.onCancelled();
+		}
+    	
+    	
+    	
+
+    }
+    
 	
 
 }

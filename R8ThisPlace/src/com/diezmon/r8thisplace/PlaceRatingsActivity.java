@@ -66,22 +66,22 @@ public class PlaceRatingsActivity extends FragmentActivity implements AddRatingD
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.place_detail);
+        setContentView(R.layout.place_ratings);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND,
                 WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
         
         try {
         	
-        	findViewById(R.id.layoutTop).setVisibility(LinearLayout.GONE);
-        	findViewById(R.id.placeInformation).setVisibility(LinearLayout.GONE);
-        	findViewById(R.id.ratingInfoLayout).setVisibility(LinearLayout.GONE);
-        	findViewById(R.id.ratingsLabelLayout).setVisibility(LinearLayout.GONE);
-        	findViewById(R.id.ratingsSummaryLayout).setVisibility(LinearLayout.GONE);
-        	
+        	      	
             placeDetail = (PlaceDetail) getIntent().getExtras().getSerializable(PlaceDetail.PLACE_DETAIL_KEY);
+
+            ImageView iv = R8Util.getImageViewFromUrl(placeDetail.icon, this, R.id.placeIconRatings);
+            
+            TextView placeName = (TextView) this.findViewById(R.id.placeNameRatings);
+            placeName.setText(placeDetail.name);
             
             ratingsScrollView = (ScrollView) this.findViewById(R.id.ratingsScrollView);
-            this.ratingsScrollerLayout = (LinearLayout) this.findViewById(R.id.ratingsSVLinearLayout);
+            this.ratingsScrollerLayout = (LinearLayout) this.findViewById(R.id.ratingsScrollerLayout);
             
             this.populateData(placeDetail);
            
@@ -97,7 +97,7 @@ public class PlaceRatingsActivity extends FragmentActivity implements AddRatingD
     private void populateData(PlaceDetail placeDetail) throws JSONException
     {
 
-    	JSONObject jObj = placeDetail.ratingInfoJson;//JSONParser.getJSONFromUrl(url.toString());
+    	JSONObject jObj = placeDetail.ratingInfoJson;
     	this.ratingsScrollerLayout.removeAllViews();
     	
     	if (!jObj.has("ratings") || jObj.getJSONArray("ratings").length() == 0)
@@ -203,32 +203,6 @@ public class PlaceRatingsActivity extends FragmentActivity implements AddRatingD
 		// TODO Auto-generated method stub
 		
 	}
-
-
-//	public void onDialogPositiveClick(AddRatingDialog dialog) {
-//		// TODO Auto-generated method stub
-//		
-//		if (dialog.ratingBar.getRating() < 1 )
-//		{
-//			Toast.makeText( App.getContext(), 
-//					App.getContext().getResources().getString(R.string.pleaseSelectRating), Toast.LENGTH_LONG ).show();
-//		}
-//		else
-//		{
-//			Toast.makeText( App.getContext(), 
-//					App.getContext().getResources().getString(R.string.addingRating), Toast.LENGTH_LONG).show();
-//			R8Util.addRating(placeDetail.latitude, placeDetail.longitude, (int)dialog.ratingBar.getRating(), dialog.comment.getText().toString());
-//			Toast.makeText( App.getContext(), 
-//					App.getContext().getResources().getString(R.string.addingRating), Toast.LENGTH_SHORT ).show();
-//		}
-//		
-//	}
-//
-//
-//	public void onDialogNegativeClick(AddRatingDialog dialog) {
-//		// TODO Auto-generated method stub
-////		Toast.makeText( this, "resultCode: " + resultCode, Toast.LENGTH_LONG ).show();
-//	}
 	
 
 }

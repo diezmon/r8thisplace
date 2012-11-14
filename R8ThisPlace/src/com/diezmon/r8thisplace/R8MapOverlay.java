@@ -58,10 +58,10 @@ public class R8MapOverlay extends ItemizedOverlay {
 			this.longitude = longitude;
 			this.reference = googleReference;
 			this.actContext = obj;
-			pd = new ProgressDialog( obj.getApplicationContext() );
-			pd.setView(obj.findViewById(R.layout.progressbar));
-			pd.setMessage(obj.getResources().getText(R.string.searching));
-			//pd.show();
+//			pd = new ProgressDialog( R8MapOverlay.this.mContext);
+//			pd.setView(obj.findViewById(R.layout.progressbar));
+//			pd.setMessage(obj.getResources().getText(R.string.loadingPlace));
+//			pd.show();
 		}
 
 		@Override
@@ -78,7 +78,7 @@ public class R8MapOverlay extends ItemizedOverlay {
 		@Override
 		protected void onPostExecute(Void result) {
 			// TODO Auto-generated method stub
-			pd.cancel();
+//			pd.cancel();
 		}		
 		
 	}
@@ -88,7 +88,7 @@ public class R8MapOverlay extends ItemizedOverlay {
 		  
 	  if (allowTap)
 	  {
-		  Toast.makeText( R8Util.getContext(), R8Util.getResources().getText(R.string.loadingPlace), Toast.LENGTH_LONG ).show();
+//		  Toast.makeText( R8Util.getContext(), R8Util.getResources().getText(R.string.loadingPlace), Toast.LENGTH_LONG ).show();
 		  OverlayItem item = mOverlays;//.get(index);
 		  double latitude = item.getPoint().getLatitudeE6() / 1E6;
 		  double longitude = item.getPoint().getLongitudeE6() / 1E6;
@@ -103,8 +103,7 @@ public class R8MapOverlay extends ItemizedOverlay {
 		  ShowPlaceTask spt = new ShowPlaceTask(latitude, longitude, googleReference, mContext);
 		  spt.execute((Void[])null);
 		  
-		 
-		
+		 		
 	  }
 	  return true;
 	}

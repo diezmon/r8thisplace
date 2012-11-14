@@ -15,15 +15,20 @@ import org.json.JSONObject;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.diezmon.r8thisplace.App;
+import com.diezmon.r8thisplace.MainActivity;
 import com.diezmon.r8thisplace.R;
+import com.google.android.maps.GeoPoint;
 
 public class R8Util {
 	
@@ -38,17 +43,17 @@ public class R8Util {
 		return  App.getContext();
 	}
 	
-	public static JSONObject addRating(double latitude, double longitude, int rating, String comments, String userName)
+	public static String addRatingUrl(double latitude, double longitude, int rating, String comments, String userName)
 	{		
 		
 		String dateString = String.valueOf(Calendar.getInstance().getTimeInMillis());
     	String timezoneId = TimeZone.getDefault().getID();
     	
-		return addRating(latitude, longitude, rating, comments, userName, dateString, timezoneId);
+		return addRatingUrl(latitude, longitude, rating, comments, userName, dateString, timezoneId);
 		
 	}
 	
-	public static JSONObject addRating(double latitude, double longitude, int rating, String comments, String userName, String date, String timezoneId)
+	public static String addRatingUrl(double latitude, double longitude, int rating, String comments, String userName, String date, String timezoneId)
 	{		
 		
 		StringBuffer url = 
@@ -62,7 +67,7 @@ public class R8Util {
 		.append("&dt=").append(date)
 		.append("&tz=").append(timezoneId);
     	
-		return JSONParser.getJSONFromUrl(url.toString());
+		return url.toString();
 		//return JSONParser.doPut(url.toString());
 		
 	}
@@ -132,6 +137,10 @@ public class R8Util {
 		
 	}
 	
+	/**
+	 * getUser names
+	 * @return
+	 */
 	public static List getUserNames()
 	{
 		AccountManager am = AccountManager.get(getContext());
@@ -158,7 +167,6 @@ public class R8Util {
 		int atIndex = email.indexOf("@");
 		
 		return email.substring(0, atIndex);
-		
-		
 	}
+    
 }

@@ -36,29 +36,29 @@ public class JSONParser {
 		return  App.getContext().getResources();
 	}
     
-    public static JSONObject getPlaceDetails(String reference)
+    public static String getPlaceDetailsUrl(String reference)
     {
     	
     	StringBuffer searchUrl = 
     			new StringBuffer( "https://maps.googleapis.com/maps/api/place/details/json?reference=")  
     	.append(reference)
     	.append("&key=AIzaSyA3neLk5bHTeQi1bD7WpfM0-EXUJKduVsQ&sensor=false");
-    	return getJSONFromUrl(searchUrl.toString());
+    	return searchUrl.toString();
     	
     }
     
-    public static JSONObject getR8ItDetails(double lat, double lng) throws JSONException
+    public static String getR8ItDetailsUrl(double lat, double lng) throws JSONException
     {
     	
     	String dateString = String.valueOf(Calendar.getInstance().getTimeInMillis());
     	String timezoneId = TimeZone.getDefault().getID();
     	
-    	return getR8ItDetails(lat, lng, dateString, timezoneId);
+    	return getR8ItDetailsUrl(lat, lng, dateString, timezoneId);
     	
     	
     }
     
-    public static JSONObject getR8ItDetails(double lat, double lng, String dateString, String timezoneId) throws JSONException
+    public static String getR8ItDetailsUrl(double lat, double lng, String dateString, String timezoneId) throws JSONException
     {
     	StringBuffer url = 
     			new StringBuffer(getResources().getString(R.string.r8Url))
@@ -67,7 +67,7 @@ public class JSONParser {
     	.append("tz=").append(timezoneId)
     	.append("&dt=").append(dateString);
 
-    	return getJSONFromUrl(url.toString());
+    	return url.toString();
     } 
    
     public static JSONObject getSearchResults(String keyword, double lat, double lng) {
@@ -96,15 +96,6 @@ public class JSONParser {
             HttpEntity httpEntity = httpResponse.getEntity();
             is = httpEntity.getContent();           
  
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
- 
-        try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(
                     is, "iso-8859-1"), 8);
             StringBuilder sb = new StringBuilder();
@@ -116,6 +107,7 @@ public class JSONParser {
             jsonString = sb.toString();
         } catch (Exception e) {
             Log.e("Buffer Error", "Error converting result " + e.toString());
+            jsonString = "{\"results\":[],\"status\":\"ZERO_RESULTS\"}";
         }
  
         // try parse the string to a JSON object

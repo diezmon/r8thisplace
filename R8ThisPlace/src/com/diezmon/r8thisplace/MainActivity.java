@@ -24,6 +24,7 @@ import android.widget.Toast;
 
 import com.diezmon.r8thisplace.util.JSONParser;
 import com.diezmon.r8thisplace.util.LastLocationFinder;
+import com.diezmon.r8thisplace.util.RestLocationTask;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
@@ -44,7 +45,7 @@ public class MainActivity extends MapActivity implements LocationListener {
      
      private LastLocationFinder lastLocationFinder;
      
-     ProgressDialog pd;
+     public static ProgressDialog pd;
      
      boolean appStartedWithLink;
      R8MapOverlay overlayToClick = null;
@@ -52,10 +53,9 @@ public class MainActivity extends MapActivity implements LocationListener {
      double paramLng = 0;
      String paramKey;
 
-     private void CenterLocatio(GeoPoint centerGeoPoint)
+     public void centerLocation(GeoPoint centerGeoPoint)
      {
-         
-         
+                 
          if (appStartedWithLink)
          {
         	 Uri appStartUri = this.getIntent().getData();
@@ -82,7 +82,6 @@ public class MainActivity extends MapActivity implements LocationListener {
          if (appStartedWithLink)
          {
         	 processSearchBackground(searchValue);
-//        	 itemizedoverlay.onTap(0);
         	 
          }
           
@@ -98,12 +97,6 @@ public class MainActivity extends MapActivity implements LocationListener {
         {
         	appStartedWithLink = true;
               // may be some test here with your custom uri
-              
-//              String path = uri.getPath();
-//              String[] pathArray = path.split("/");
-//              String lat = pathArray[pathArray.length-1];
-//              String lng = pathArray[pathArray.length]; 
-              
         }
         else
         {
@@ -155,19 +148,13 @@ public class MainActivity extends MapActivity implements LocationListener {
         
     }
     
-//    @Override
-//    protected Dialog onCreateDialog(int id) {
-//        
-//        return null;
-//    }
-    
     private void initLocation()
     {
         
         if(!myLocationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER ))
         {
             Log.d(TAG, "GPS OFF ");
-            Toast.makeText( this, "Please turn on GPS", Toast.LENGTH_SHORT ).show();
+            Toast.makeText( this, getResources().getString(R.string.turnOnGps), Toast.LENGTH_SHORT ).show();
             Intent enableGPSIntent = new Intent( Settings.ACTION_SECURITY_SETTINGS );
             startActivityForResult(enableGPSIntent, 99);
            
@@ -194,7 +181,7 @@ public class MainActivity extends MapActivity implements LocationListener {
                 
                 
                 Log.d(TAG, "geoPoint " + myGeoPoint);
-                CenterLocatio(myGeoPoint);
+                centerLocation(myGeoPoint);
             }
             
         }    
@@ -219,7 +206,8 @@ public class MainActivity extends MapActivity implements LocationListener {
             this.obj = obj;
             pd = new ProgressDialog(obj);
             pd.setView(obj.findViewById(R.layout.progressbar));
-            pd.setMessage(getResources().getText(R.string.searching));
+            String callNumber = getResources().getString(R.string.searching);             
+            pd.setMessage(String.format(callNumber, searchString));
             pd.show();
         }
         
@@ -329,22 +317,9 @@ public class MainActivity extends MapActivity implements LocationListener {
     
     private void initLocaleRestFul()
     {
-        
-        JSONObject jObj = JSONParser.getJSONFromUrl("http://freegeoip.net/json/");
-        
-        try {
-
-            GeoPoint myGeoPoint = new GeoPoint(
-                    (int) (jObj.getInt("latitude") * 1E6),
-                    (int) (jObj.getInt("longitude") * 1E6));
-            
-            Log.d(TAG, "geoPoint " + myGeoPoint);
-            CenterLocatio(myGeoPoint);
-            
-        } catch (Exception e) {
-            Toast.makeText( this, this.getResources().getText(R.string.noLocation), Toast.LENGTH_LONG ).show();
-            e.printStackTrace();
-        }
+   	
+    	RestLocationTask st = new RestLocationTask(this);
+        st.execute((Void[])null);
             
     }
       
@@ -380,7 +355,7 @@ public class MainActivity extends MapActivity implements LocationListener {
                 (int) (argLocation.getLatitude() * 1000000),
                 (int) (argLocation.getLongitude() * 1000000));
 
-        CenterLocatio(myGeoPoint);
+        centerLocation(myGeoPoint);
     }
 
     public void onStatusChanged(String provider, int status, Bundle extras) {
