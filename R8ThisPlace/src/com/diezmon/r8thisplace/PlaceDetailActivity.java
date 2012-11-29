@@ -63,7 +63,7 @@ public class PlaceDetailActivity extends FragmentActivity implements PlaceActivi
             
             TextView placeInfo = (TextView) this.findViewById(R.id.placeInfo);
             
-            String webSite = (R8Util.isEmptyTrimmed(placeDetail.webSite))?"":placeDetail.webSite;
+            String webSite = (R8Util.isEmptyTrimmed(placeDetail.url))?"":placeDetail.url;
             
             if (!R8Util.isEmptyTrimmed(webSite))
             {
@@ -71,7 +71,7 @@ public class PlaceDetailActivity extends FragmentActivity implements PlaceActivi
             	
             	placeInfo.setOnClickListener(new OnClickListener() {
                     public void onClick(View v) {
-                    	Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(placeDetail.webSite));
+                    	Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(placeDetail.url));
                     	startActivity(browserIntent);
                     }
                 });
@@ -288,21 +288,6 @@ public class PlaceDetailActivity extends FragmentActivity implements PlaceActivi
 		}    	
 
     }
-    
-	@Override
-	protected void onPostResume() {
-		// TODO Auto-generated method stub
-		super.onPostResume();
-//		String ratingUrl;
-//		try {
-//			ratingUrl = JSONParser.getR8ItDetailsUrl(placeDetail.latitude, placeDetail.longitude);
-//			new GetRemoteImageTask().execute(ratingUrl, this);
-//		} catch (JSONException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-        
-	}
     
 	
 

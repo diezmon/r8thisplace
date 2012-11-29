@@ -208,22 +208,6 @@ public class PlaceRatingsActivity extends FragmentActivity implements PlaceActiv
 		// TODO Auto-generated method stub
 		
 	}
-
-	@Override
-	protected void onPostResume() {
-		// TODO Auto-generated method stub
-		super.onPostResume();
-//		String ratingUrl;
-//		try {
-//			ratingUrl = JSONParser.getR8ItDetailsUrl(placeDetail.latitude, placeDetail.longitude);
-//			new GetRemoteImageTask().execute(ratingUrl, this);
-//		} catch (JSONException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-        
-	}
-	
 	
 
 }
