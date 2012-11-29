@@ -58,10 +58,6 @@ public class R8MapOverlay extends ItemizedOverlay {
 			this.longitude = longitude;
 			this.reference = googleReference;
 			this.actContext = obj;
-//			pd = new ProgressDialog( R8MapOverlay.this.mContext);
-//			pd.setView(obj.findViewById(R.layout.progressbar));
-//			pd.setMessage(obj.getResources().getText(R.string.loadingPlace));
-//			pd.show();
 		}
 
 		@Override

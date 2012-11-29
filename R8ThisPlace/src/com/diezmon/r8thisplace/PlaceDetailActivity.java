@@ -1,7 +1,7 @@
 package com.diezmon.r8thisplace;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,20 +19,17 @@ import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.diezmon.r8thisplace.model.PlaceDetail;
+import com.diezmon.r8thisplace.util.GetRemoteImageTask;
 import com.diezmon.r8thisplace.util.JSONParser;
 import com.diezmon.r8thisplace.util.R8Util;
 
-public class PlaceDetailActivity extends FragmentActivity implements AddRatingDialog.RatingDialogListener {
+public class PlaceDetailActivity extends FragmentActivity implements PlaceActivity, AddRatingDialog.RatingDialogListener {
 
 	LinearLayout ratingLayout = null;
-	
-//	ScrollView ratingsScrollView;
-//	LinearLayout ratingsScrollerLayout;
 	
 	PlaceDetail placeDetail;
 	
@@ -57,7 +54,9 @@ public class PlaceDetailActivity extends FragmentActivity implements AddRatingDi
         	
             placeDetail = (PlaceDetail) getIntent().getExtras().getSerializable(PlaceDetail.PLACE_DETAIL_KEY);
             
-            ImageView iv = R8Util.getImageViewFromUrl(placeDetail.icon, this, R.id.placeIcon);
+            ImageView placeIconImageView = (ImageView) this.findViewById(R.id.placeIcon);
+            
+            new GetRemoteImageTask().execute(placeDetail.icon, placeIconImageView);
             
             TextView placeName = (TextView) this.findViewById(R.id.placeName);
             placeName.setText(placeDetail.name);
@@ -107,19 +106,24 @@ public class PlaceDetailActivity extends FragmentActivity implements AddRatingDi
         }
         catch (Exception e)
         {
-        	Toast.makeText( this, getResources().getString(R.string.errorGeneral), Toast.LENGTH_LONG ).show();
-        	e.printStackTrace();
+//        	Toast.makeText( this, getResources().getString(R.string.errorGeneral), Toast.LENGTH_LONG ).show();
+        	Toast.makeText( this, e.getMessage(), Toast.LENGTH_LONG ).show();
+//        	e.printStackTrace();
+        	StringWriter sw = new StringWriter();
+        	PrintWriter pw = new PrintWriter(sw);
+        	e.printStackTrace(pw);
+        	R8Util.sendEmail(this, "Error from r8thisplace " + this.getLocalClassName(), e.getMessage() + "\n" + sw.toString());
         	
         }
         
     }
     
     
-    private void populateData(JSONObject jObj)
+    public void populateData(JSONObject jObj)
     {
-
-//    	JSONObject jObj = placeDetail.ratingInfoJson;
     	
+    	this.placeDetail.ratingInfoJson = jObj;
+
     	int overallRating = 0;
     	
     	try
@@ -174,11 +178,11 @@ public class PlaceDetailActivity extends FragmentActivity implements AddRatingDi
     	}
     	catch (Exception e)
     	{
-    		Toast.makeText( this, getResources().getString(R.string.errorGeneral), Toast.LENGTH_LONG ).show();
+//    		Toast.makeText( this, getResources().getString(R.string.errorGeneral), Toast.LENGTH_LONG ).show();
+    		Toast.makeText( this, e.getMessage(), Toast.LENGTH_LONG ).show();
     	}
     	
     }
-
 
 	public void onDialogPositiveClick(AddRatingDialog dialog) {
 		
@@ -281,12 +285,24 @@ public class PlaceDetailActivity extends FragmentActivity implements AddRatingDi
 		protected void onCancelled() {
 			// TODO Auto-generated method stub
 			super.onCancelled();
-		}
-    	
-    	
-    	
+		}    	
 
     }
+    
+	@Override
+	protected void onPostResume() {
+		// TODO Auto-generated method stub
+		super.onPostResume();
+//		String ratingUrl;
+//		try {
+//			ratingUrl = JSONParser.getR8ItDetailsUrl(placeDetail.latitude, placeDetail.longitude);
+//			new GetRemoteImageTask().execute(ratingUrl, this);
+//		} catch (JSONException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+        
+	}
     
 	
 

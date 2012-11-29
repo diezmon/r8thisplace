@@ -153,7 +153,7 @@ public class ShowPlaceActivity extends TabActivity  {
 		@Override
 		protected void onPostExecute(Map<String, JSONObject> result) {
 			// TODO Auto-generated method stub
-//			super.onPostExecute(result);
+			super.onPostExecute(result);
 			this.callerActivity.onGetResults(result);
 		}
 
@@ -166,11 +166,6 @@ public class ShowPlaceActivity extends TabActivity  {
 				pd.cancel();
 			}
 		}
-    	
-    	
-    	
-
     }
-
 
 }

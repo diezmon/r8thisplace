@@ -81,6 +81,11 @@ public class JSONParser {
     	return getJSONFromUrl(searchUrl.toString());
     }
     
+    public static JSONObject getLocation()
+    {
+    	return getJSONFromUrl(getResources().getString(R.string.placeFromIp));
+    }
+    
     public static JSONObject getJSONFromUrl(String inputUrl) {
  
     	JSONObject jsonObj = null;

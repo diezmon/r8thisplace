@@ -1,6 +1,8 @@
 package com.diezmon.r8thisplace;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -9,13 +11,14 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -34,24 +37,26 @@ import com.google.android.maps.OverlayItem;
 
 public class MainActivity extends MapActivity implements LocationListener {
 
-    String searchValue = "";
-    
-    private static final String TAG = "R8ThisPlace";
-     private LocationManager myLocationManager;
-     
-     private MapView myMapView;
-     
-     private MapController myMapController;
-     
-     private LastLocationFinder lastLocationFinder;
-     
-     public static ProgressDialog pd;
-     
-     boolean appStartedWithLink;
-     R8MapOverlay overlayToClick = null;
-     double paramLat = 0;
-     double paramLng = 0;
-     String paramKey;
+	 String searchValue = "";
+	 
+	 private int gpsWarningCount = 0;
+	    
+	 public static final String TAG = "R8ThisPlace";
+	 private LocationManager myLocationManager;
+	 
+	 private MapView myMapView;
+	 
+	 private MapController myMapController;
+	 
+	 private LastLocationFinder lastLocationFinder;
+	 
+	 public static ProgressDialog pd;
+	 
+	 boolean appStartedWithLink;
+	 R8MapOverlay overlayToClick = null;
+	 double paramLat = 0;
+	 double paramLng = 0;
+	 String paramKey;
 
      public void centerLocation(GeoPoint centerGeoPoint)
      {
@@ -150,18 +155,10 @@ public class MainActivity extends MapActivity implements LocationListener {
     
     private void initLocation()
     {
-        
-        if(!myLocationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER ))
-        {
-            Log.d(TAG, "GPS OFF ");
-            Toast.makeText( this, getResources().getString(R.string.turnOnGps), Toast.LENGTH_SHORT ).show();
-            Intent enableGPSIntent = new Intent( Settings.ACTION_SECURITY_SETTINGS );
-            startActivityForResult(enableGPSIntent, 99);
-           
-        }
-        else
-        {
-            Log.d(TAG, "GPS ON ");
+    	
+    	if( myLocationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER) || myLocationManager.isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER) )
+    	{
+    		Log.d(TAG, "GPS ON ");
             Location lastLocation = myLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             if (lastLocation == null)
             {
@@ -174,17 +171,57 @@ public class MainActivity extends MapActivity implements LocationListener {
             else
             {
                 Log.d(TAG, "lastLocation " + lastLocation);
-//                Toast.makeText( this, lastLocation.getLatitude()*1E6 + "," + lastLocation.getLongitude()*1E6, Toast.LENGTH_LONG ).show();
                 GeoPoint myGeoPoint = new GeoPoint(
                         (int) (lastLocation.getLatitude() * 1E6),
                         (int) (lastLocation.getLongitude() * 1E6));
                 
-                
                 Log.d(TAG, "geoPoint " + myGeoPoint);
                 centerLocation(myGeoPoint);
             }
-            
-        }    
+    	}
+    	else
+    	{
+    		Log.d(TAG, "GPS OFF ");
+    		this.initLocaleRestFul(); 
+    	}
+    	
+    	
+//        if( !myLocationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER ))
+//        {
+//            Log.d(TAG, "GPS OFF ");
+//            Toast.makeText( this, getResources().getString(R.string.turnOnGps), Toast.LENGTH_SHORT ).show();
+//            Intent enableGPSIntent = new Intent( Settings.ACTION_SECURITY_SETTINGS );
+//            gpsWarningCount = 1;
+//            startActivityForResult(enableGPSIntent, 99);
+//           
+//        }
+//        else
+//        {
+//            Log.d(TAG, "GPS ON ");
+//            Location lastLocation = myLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+//            if (lastLocation == null)
+//            {
+//                lastLocation = myLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);    
+//            }
+//            if (lastLocation == null)
+//            {
+//                this.initLocaleRestFul();    
+//            }
+//            else
+//            {
+//                Log.d(TAG, "lastLocation " + lastLocation);
+////                Toast.makeText( this, lastLocation.getLatitude()*1E6 + "," + lastLocation.getLongitude()*1E6, Toast.LENGTH_LONG ).show();
+//                GeoPoint myGeoPoint = new GeoPoint(
+//                        (int) (lastLocation.getLatitude() * 1E6),
+//                        (int) (lastLocation.getLongitude() * 1E6));
+//                
+//                
+//                Log.d(TAG, "geoPoint " + myGeoPoint);
+//                centerLocation(myGeoPoint);
+//            }
+//            
+//        }
+        
         
     }
     

@@ -17,9 +17,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.diezmon.r8thisplace.model.PlaceDetail;
+import com.diezmon.r8thisplace.util.GetRemoteImageTask;
+import com.diezmon.r8thisplace.util.JSONParser;
 import com.diezmon.r8thisplace.util.R8Util;
 
-public class PlaceRatingsActivity extends FragmentActivity implements AddRatingDialog.RatingDialogListener {
+public class PlaceRatingsActivity extends FragmentActivity implements PlaceActivity, AddRatingDialog.RatingDialogListener {
 
 	LinearLayout ratingLayout = null;
 	
@@ -41,7 +43,7 @@ public class PlaceRatingsActivity extends FragmentActivity implements AddRatingD
 				if ( !R8Util.isEmptyTrimmed(jsonDataString) )
 				{
 					placeDetail.ratingInfoJson = new JSONObject(jsonDataString);
-					this.populateData(placeDetail);
+					this.populateData(placeDetail.ratingInfoJson);
 				}
 				
 				R8Util.savePreferenceBool(ShowPlaceActivity.DATA_UPDATED_KEY, false);	
@@ -75,15 +77,19 @@ public class PlaceRatingsActivity extends FragmentActivity implements AddRatingD
         	      	
             placeDetail = (PlaceDetail) getIntent().getExtras().getSerializable(PlaceDetail.PLACE_DETAIL_KEY);
 
-            ImageView iv = R8Util.getImageViewFromUrl(placeDetail.icon, this, R.id.placeIconRatings);
+            ImageView placeIconImageView = (ImageView) this.findViewById(R.id.placeIconRatings);
+            
+            new GetRemoteImageTask().execute(placeDetail.icon, placeIconImageView);
             
             TextView placeName = (TextView) this.findViewById(R.id.placeNameRatings);
             placeName.setText(placeDetail.name);
             
             ratingsScrollView = (ScrollView) this.findViewById(R.id.ratingsScrollView);
             this.ratingsScrollerLayout = (LinearLayout) this.findViewById(R.id.ratingsScrollerLayout);
+            this.ratingsScrollerLayout.setOrientation(LinearLayout.VERTICAL);
             
-            this.populateData(placeDetail);
+            
+            this.populateData(placeDetail.ratingInfoJson);
            
         }
         catch (Exception e)
@@ -94,10 +100,9 @@ public class PlaceRatingsActivity extends FragmentActivity implements AddRatingD
         
     }
     
-    private void populateData(PlaceDetail placeDetail) throws JSONException
+    public void populateData(JSONObject jObj) throws JSONException
     {
 
-    	JSONObject jObj = placeDetail.ratingInfoJson;
     	this.ratingsScrollerLayout.removeAllViews();
     	
     	if (!jObj.has("ratings") || jObj.getJSONArray("ratings").length() == 0)
@@ -203,6 +208,22 @@ public class PlaceRatingsActivity extends FragmentActivity implements AddRatingD
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	protected void onPostResume() {
+		// TODO Auto-generated method stub
+		super.onPostResume();
+//		String ratingUrl;
+//		try {
+//			ratingUrl = JSONParser.getR8ItDetailsUrl(placeDetail.latitude, placeDetail.longitude);
+//			new GetRemoteImageTask().execute(ratingUrl, this);
+//		} catch (JSONException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+        
+	}
+	
 	
 
 }

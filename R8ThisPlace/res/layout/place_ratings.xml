@@ -30,11 +30,12 @@
             android:src="@drawable/ic_marker" />
 
     </LinearLayout>
-
+
     <LinearLayout
         android:id="@+id/ratingsScrollerLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
         
 	    <ScrollView
 	        android:id="@+id/ratingsScrollView"

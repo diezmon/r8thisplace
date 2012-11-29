@@ -2,6 +2,7 @@
 
     <string name="r8Url">http://json4.r8thisplace.appspot.com/rest/json/</string>
     <string name="r8PutUrl">http://json4.r8thisplace.appspot.com/rest/put/</string>
+    <string name="placeFromIp">http://freegeoip.net/json/</string>
     <!--  <string name="r8Url">http://10.40.142.53:8888/rest/json/</string>
     <string name="r8PutUrl">http://10.40.142.53:8888/rest/put/</string> -->
     <string name="app_name">R8ThisPlace</string>
@@ -24,7 +25,7 @@
     <string name="title_activity_rate_it">Rate it</string>
     <string name="pleaseSelectRating">You forgot to select a rating first!</string>
     <string name="addingRating">Adding your rating&#8230;</string>
-    <string name="doLocationWebSearch">Cannot determine your location with GPS, trying web service.</string>
+    <string name="doLocationWebSearch">Determining your location with web service.</string>
     <string name="noLocation">Cannot determine your location! This application can not continue :( </string>
     <string name="errorGeneral">Something went terribly wrong :( </string>
     <string name="sendEmail">Email it</string>

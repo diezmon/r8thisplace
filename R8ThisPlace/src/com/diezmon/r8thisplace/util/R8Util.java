@@ -10,25 +10,19 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.TimeZone;
 
-import org.json.JSONObject;
-
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.diezmon.r8thisplace.App;
-import com.diezmon.r8thisplace.MainActivity;
 import com.diezmon.r8thisplace.R;
-import com.google.android.maps.GeoPoint;
 
 public class R8Util {
 	
@@ -167,6 +161,21 @@ public class R8Util {
 		int atIndex = email.indexOf("@");
 		
 		return email.substring(0, atIndex);
+	}
+	
+	public static void sendEmail(Activity activity, String subject, String message)
+	{
+
+		  Intent email = new Intent(Intent.ACTION_SEND);
+
+		  email.putExtra(Intent.EXTRA_SUBJECT, subject);
+		 
+		  email.putExtra(Intent.EXTRA_TEXT, message);
+
+		  //need this to prompts email client only
+		  email.setType("message/rfc822");
+		
+		  activity.startActivity(Intent.createChooser(email, getResources().getString(R.string.chooseEmailClient)));
 	}
     
 }
