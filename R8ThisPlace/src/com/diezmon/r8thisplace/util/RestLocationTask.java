@@ -41,7 +41,7 @@ public class RestLocationTask extends AsyncTask<Void, Void, JSONObject> {
                      (int) (jObj.getInt("latitude") * 1E6),
                      (int) (jObj.getInt("longitude") * 1E6));
          	
-         	mainActivity.centerLocation(currentPoint);
+//         	mainActivity.centerLocation(currentPoint);
          	
          } catch (Exception e) {
          	Toast.makeText( mainActivity, R8Util.getResources().getText(R.string.noLocation), Toast.LENGTH_LONG ).show();

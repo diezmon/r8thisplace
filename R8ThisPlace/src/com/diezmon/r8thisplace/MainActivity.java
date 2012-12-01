@@ -1,22 +1,14 @@
 package com.diezmon.r8thisplace;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.Locale;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
-import android.location.Address;
-import android.location.Geocoder;
-import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -27,15 +19,16 @@ import android.widget.Toast;
 
 import com.diezmon.r8thisplace.util.JSONParser;
 import com.diezmon.r8thisplace.util.LastLocationFinder;
-import com.diezmon.r8thisplace.util.RestLocationTask;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
+import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 
-public class MainActivity extends MapActivity implements LocationListener {
+public class MainActivity extends MapActivity  
+{
 
 	 String searchValue = "";
 	 
@@ -45,6 +38,8 @@ public class MainActivity extends MapActivity implements LocationListener {
 	 private LocationManager myLocationManager;
 	 
 	 private MapView myMapView;
+	 
+	 private MyLocationOverlay mMyLocationOverlay;
 	 
 	 private MapController myMapController;
 	 
@@ -58,40 +53,6 @@ public class MainActivity extends MapActivity implements LocationListener {
 	 double paramLng = 0;
 	 String paramKey;
 
-     public void centerLocation(GeoPoint centerGeoPoint)
-     {
-                 
-         if (appStartedWithLink)
-         {
-        	 Uri appStartUri = this.getIntent().getData();
-        	 paramLat = Double.parseDouble(appStartUri.getQueryParameter("lat")); // "str" is set
-        	 paramLng = Double.parseDouble(appStartUri.getQueryParameter("lng")); // "string" is set
-        	 searchValue = appStartUri.getQueryParameter("key"); 
-             
-             centerGeoPoint = new GeoPoint(
-                     (int) (paramLat * 1E6),
-                     (int) (paramLng * 1E6));             
-         }
-         
-         myMapController.animateTo(centerGeoPoint);  
-         
-         List<Overlay> mapOverlays = myMapView.getOverlays();
-         Drawable drawable = this.getResources().getDrawable(R.drawable.ic_marker);
-         R8MapOverlay itemizedoverlay = new R8MapOverlay(drawable, this, appStartedWithLink);
-          
-         OverlayItem overlayitem = new OverlayItem(centerGeoPoint, "Center!", "I'm right here!");
-         itemizedoverlay.addOverlay(overlayitem);
-          
-         mapOverlays.add(itemizedoverlay);
-         
-         if (appStartedWithLink)
-         {
-        	 processSearchBackground(searchValue);
-        	 
-         }
-          
-      
-     }
      
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -107,35 +68,23 @@ public class MainActivity extends MapActivity implements LocationListener {
         {
         	appStartedWithLink = false;
         }
-        
-        
 
         setContentView(R.layout.activity_main);
         ImageButton button = (ImageButton) findViewById(R.id.buttonPrompt);
         myMapView = (MapView) findViewById(R.id.mapview);
-
-        myMapController = myMapView.getController();
-        myMapController.setZoom(12); // Fixed Zoom Level
-        myMapView.setBuiltInZoomControls(true);
-
-        myLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         
-        lastLocationFinder = new LastLocationFinder(this);
-        lastLocationFinder.setChangedLocationListener(this);
-        
-        initLocation();
+        showLocation();
 
     }
     
-    protected void onActivityResult(int requestCode, int resultCode,
-            Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         
         switch (requestCode)
         {
         case 99:
             if (resultCode == RESULT_OK || resultCode == RESULT_CANCELED) {
                 // back from settings/gps screen
-                initLocation();
+//                initLocation();
             }
         case 66:
             if (resultCode == RESULT_OK) {
@@ -153,76 +102,21 @@ public class MainActivity extends MapActivity implements LocationListener {
         
     }
     
-    private void initLocation()
+    private void showLocation()
     {
-    	
-    	if( myLocationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER) || myLocationManager.isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER) )
+    	if (mMyLocationOverlay == null)
     	{
-    		Log.d(TAG, "GPS ON ");
-            Location lastLocation = myLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            if (lastLocation == null)
-            {
-                lastLocation = myLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);    
-            }
-            if (lastLocation == null)
-            {
-                this.initLocaleRestFul();    
-            }
-            else
-            {
-                Log.d(TAG, "lastLocation " + lastLocation);
-                GeoPoint myGeoPoint = new GeoPoint(
-                        (int) (lastLocation.getLatitude() * 1E6),
-                        (int) (lastLocation.getLongitude() * 1E6));
-                
-                Log.d(TAG, "geoPoint " + myGeoPoint);
-                centerLocation(myGeoPoint);
-            }
+    		mMyLocationOverlay = new MyLocationOverlay(this, myMapView);
     	}
-    	else
-    	{
-    		Log.d(TAG, "GPS OFF ");
-    		this.initLocaleRestFul(); 
-    	}
-    	
-    	
-//        if( !myLocationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER ))
-//        {
-//            Log.d(TAG, "GPS OFF ");
-//            Toast.makeText( this, getResources().getString(R.string.turnOnGps), Toast.LENGTH_SHORT ).show();
-//            Intent enableGPSIntent = new Intent( Settings.ACTION_SECURITY_SETTINGS );
-//            gpsWarningCount = 1;
-//            startActivityForResult(enableGPSIntent, 99);
-//           
-//        }
-//        else
-//        {
-//            Log.d(TAG, "GPS ON ");
-//            Location lastLocation = myLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-//            if (lastLocation == null)
-//            {
-//                lastLocation = myLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);    
-//            }
-//            if (lastLocation == null)
-//            {
-//                this.initLocaleRestFul();    
-//            }
-//            else
-//            {
-//                Log.d(TAG, "lastLocation " + lastLocation);
-////                Toast.makeText( this, lastLocation.getLatitude()*1E6 + "," + lastLocation.getLongitude()*1E6, Toast.LENGTH_LONG ).show();
-//                GeoPoint myGeoPoint = new GeoPoint(
-//                        (int) (lastLocation.getLatitude() * 1E6),
-//                        (int) (lastLocation.getLongitude() * 1E6));
-//                
-//                
-//                Log.d(TAG, "geoPoint " + myGeoPoint);
-//                centerLocation(myGeoPoint);
-//            }
-//            
-//        }
-        
-        
+    	mMyLocationOverlay.runOnFirstFix(new Runnable() { public void run() {
+        	myMapView.getController().setZoom(12);
+        	myMapView.getController().animateTo(mMyLocationOverlay.getMyLocation());
+        }});
+         
+        myMapView.getOverlays().add(mMyLocationOverlay);
+
+        myMapView.setBuiltInZoomControls(true);
+
     }
     
     private class SearchTask extends AsyncTask<Double,Double,JSONObject>{
@@ -348,17 +242,9 @@ public class MainActivity extends MapActivity implements LocationListener {
             mapOverlays.add(itemizedoverlay);
         }
         
-        this.myMapView.postInvalidate();
+        myMapView.getController().setCenter(mMyLocationOverlay.getMyLocation());
           
      }
-    
-    private void initLocaleRestFul()
-    {
-   	
-    	RestLocationTask st = new RestLocationTask(this);
-        st.execute((Void[])null);
-            
-    }
       
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -374,41 +260,17 @@ public class MainActivity extends MapActivity implements LocationListener {
     @Override 
     public void onResume() {
         Log.d(TAG, "onResume " );
-        myLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 1, this);
         super.onResume();
+        mMyLocationOverlay.enableMyLocation();
+        this.showLocation();
     }
 
     @Override
     public void onPause() {
-        myLocationManager.removeUpdates(this);
         super.onPause();
+        mMyLocationOverlay.disableMyLocation();
     }
 
-    public void onLocationChanged(Location argLocation) {
-        // TODO Auto-generated method stub
-        Log.d(TAG, "argLocation " + argLocation);
-        
-        GeoPoint myGeoPoint = new GeoPoint(
-                (int) (argLocation.getLatitude() * 1000000),
-                (int) (argLocation.getLongitude() * 1000000));
-
-        centerLocation(myGeoPoint);
-    }
-
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    public void onProviderEnabled(String provider) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    public void onProviderDisabled(String provider) {
-        // TODO Auto-generated method stub
-        
-    }
     
     /** Called when the user touches the button */
     public void showSearchDialog(View view) {
@@ -416,6 +278,12 @@ public class MainActivity extends MapActivity implements LocationListener {
         Intent searchIntent = new Intent(this, TextEntryActivity.class);
         searchIntent.putExtra("value", this.searchValue);
         this.startActivityForResult(searchIntent, 66);
+    }
+    
+    @Override
+    public void onBackPressed() 
+    {
+    	this.finish();
     }
     
 }
